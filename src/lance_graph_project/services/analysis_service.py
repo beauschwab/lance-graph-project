@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from datetime import UTC, datetime
 
 from lance_graph_project.services.repository import JsonGraphRepository
 
@@ -74,10 +75,21 @@ class AnalysisService:
 
     def get_stale_blockers(self, threshold_days: int = 14) -> list[dict]:
         stale = []
+        now = datetime.now(UTC)
         for edge in self.repo.list_edges("DEPENDS_ON"):
             if edge.get("resolved_at"):
                 continue
-            stale.append({"src_id": edge["src_id"], "dst_id": edge["dst_id"], "age_days": threshold_days + 1})
+            created_at = edge.get("created_at")
+            if created_at:
+                try:
+                    created = datetime.fromisoformat(created_at)
+                    age_days = (now - created).days
+                except (ValueError, TypeError):
+                    age_days = 0
+            else:
+                age_days = 0
+            if age_days >= threshold_days:
+                stale.append({"src_id": edge["src_id"], "dst_id": edge["dst_id"], "age_days": age_days})
         return stale
 
     def get_handoff_hotspots(self) -> list[dict]:
