@@ -12,3 +12,9 @@ wheels/
 # Data directories (test artifacts)
 .orchestrate_data/
 exports/
+
+# Frontend build artifacts and caches
+frontend/node_modules/.vite/deps/
+frontend/node_modules/@esbuild/linux-x64/
+frontend/node_modules/@rollup/rollup-linux-x64-gnu/
+frontend/node_modules/@rollup/rollup-linux-x64-musl/
