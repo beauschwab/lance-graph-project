@@ -538,6 +538,38 @@ class TestSettingsEndpoints:
         assert r.status_code == 200
         assert r.json()["count"] >= 1
 
+    def test_create_person_via_settings(self) -> None:
+        c = _client()
+        r = c.post("/api/settings/people", json={"data": {"name": "Charlie", "email": "c@example.com"}})
+        assert r.status_code == 200
+        assert "person_id" in r.json()
+        listed = c.get("/api/settings/people").json()
+        assert listed["count"] == 1
+
+    def test_create_application_via_settings(self) -> None:
+        c = _client()
+        r = c.post("/api/settings/applications", json={"data": {"name": "API Gateway", "description": "main entry point"}})
+        assert r.status_code == 200
+        assert "app_id" in r.json()
+
+    def test_create_status_via_settings(self) -> None:
+        c = _client()
+        r = c.post("/api/settings/statuses", json={"data": {"name": "In Review", "category": "in_progress", "sort_order": 5}})
+        assert r.status_code == 200
+        assert "status_id" in r.json()
+
+    def test_create_priority_via_settings(self) -> None:
+        c = _client()
+        r = c.post("/api/settings/priorities", json={"data": {"name": "Critical", "level": 0}})
+        assert r.status_code == 200
+        assert "priority_id" in r.json()
+
+    def test_create_tag_via_settings(self) -> None:
+        c = _client()
+        r = c.post("/api/settings/tags", json={"data": {"name": "performance", "category": "domain"}})
+        assert r.status_code == 200
+        assert "tag_id" in r.json()
+
     def test_generic_entity_update(self) -> None:
         c = _client()
         tag = c.post("/api/nodes/Tag", json={"data": {"name": "old", "category": "general"}}).json()

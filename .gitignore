@@ -8,3 +8,7 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Data directories (test artifacts)
+.orchestrate_data/
+exports/

@@ -215,7 +215,6 @@ class JsonGraphRepository:
         return validated
 
     def delete_edge(self, edge_type: str, src_id: str, dst_id: str) -> bool:
-        rel = self.registry.get_relationship(edge_type)
         key = f"{src_id}::{dst_id}"
         bucket = self._edges.setdefault(edge_type, {})
         if key not in bucket:
