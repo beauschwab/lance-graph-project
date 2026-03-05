@@ -56,3 +56,19 @@ def get_schema_service() -> SchemaService:
 @lru_cache(maxsize=1)
 def get_import_export_service() -> ImportExportService:
     return ImportExportService(repo=get_repository(), node_service=get_node_service(), edge_service=get_edge_service())
+
+
+def clear_all_caches() -> None:
+    """Clear all service caches.  Useful for test isolation."""
+    for fn in (
+        get_repository,
+        get_node_service,
+        get_edge_service,
+        get_query_service,
+        get_search_service,
+        get_analysis_service,
+        get_settings_service,
+        get_schema_service,
+        get_import_export_service,
+    ):
+        fn.cache_clear()

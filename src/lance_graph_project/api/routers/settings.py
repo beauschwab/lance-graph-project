@@ -30,10 +30,26 @@ def list_people() -> dict:
     return {"items": items, "count": len(items)}
 
 
+@router.post("/people")
+def create_person(request: NodeUpsertRequest) -> dict:
+    try:
+        return get_node_service().create_node("Person", request.data)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @router.get("/applications")
 def list_applications() -> dict:
     items = get_settings_service().list_applications()
     return {"items": items, "count": len(items)}
+
+
+@router.post("/applications")
+def create_application(request: NodeUpsertRequest) -> dict:
+    try:
+        return get_node_service().create_node("Application", request.data)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/statuses")
@@ -42,16 +58,40 @@ def list_statuses() -> dict:
     return {"items": items, "count": len(items)}
 
 
+@router.post("/statuses")
+def create_status(request: NodeUpsertRequest) -> dict:
+    try:
+        return get_node_service().create_node("StatusConfig", request.data)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @router.get("/priorities")
 def list_priorities() -> dict:
     items = get_settings_service().list_priorities()
     return {"items": items, "count": len(items)}
 
 
+@router.post("/priorities")
+def create_priority(request: NodeUpsertRequest) -> dict:
+    try:
+        return get_node_service().create_node("PriorityConfig", request.data)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
 @router.get("/tags")
 def list_tags() -> dict:
     items = get_settings_service().list_tags()
     return {"items": items, "count": len(items)}
+
+
+@router.post("/tags")
+def create_tag(request: NodeUpsertRequest) -> dict:
+    try:
+        return get_node_service().create_node("Tag", request.data)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.put("/{entity}/{entity_id}")

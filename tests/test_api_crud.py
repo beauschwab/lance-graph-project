@@ -6,14 +6,14 @@ import shutil
 from fastapi.testclient import TestClient
 
 from lance_graph_project.api.app import create_app
-from lance_graph_project.services.container import get_repository
+from lance_graph_project.services.container import clear_all_caches
 
 
 def _reset_data() -> None:
     data_dir = Path.cwd() / ".orchestrate_data"
     if data_dir.exists():
         shutil.rmtree(data_dir)
-    get_repository.cache_clear()
+    clear_all_caches()
 
 
 def test_node_and_edge_crud_flow() -> None:

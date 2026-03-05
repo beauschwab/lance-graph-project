@@ -105,8 +105,15 @@ class JsonGraphRepository:
         paged = items[offset : offset + limit]
         return PagedResult(items=paged, total=total)
 
-    def get_node(self, node_type: str, node_id: str) -> dict[str, Any] | None:
+    def _get_node_raw(self, node_type: str, node_id: str) -> dict[str, Any] | None:
+        """Return the raw node dict including soft-deleted items."""
         return self._nodes.get(node_type, {}).get(node_id)
+
+    def get_node(self, node_type: str, node_id: str) -> dict[str, Any] | None:
+        node = self._get_node_raw(node_type, node_id)
+        if node and node.get("deleted_at") is not None:
+            return None
+        return node
 
     def create_node(self, node_type: str, payload: dict[str, Any]) -> dict[str, Any]:
         node_spec = self.registry.get_node(node_type)
@@ -115,6 +122,12 @@ class JsonGraphRepository:
         payload.setdefault("created_at", self._now())
         payload.setdefault("updated_at", self._now())
         payload.setdefault("deleted_at", None)
+
+        lifecycle_keys = {"created_at", "updated_at", "deleted_at"}
+        model_fields = set(NODE_MODELS[node_type].model_fields) | lifecycle_keys
+        unknown = set(payload) - model_fields
+        if unknown:
+            raise ValueError(f"Unknown fields for {node_type}: {sorted(unknown)}")
 
         validated = self._validate_node(node_type, {k: v for k, v in payload.items() if k in NODE_MODELS[node_type].model_fields})
         validated["created_at"] = payload["created_at"]
@@ -142,8 +155,8 @@ class JsonGraphRepository:
         return validated
 
     def delete_node(self, node_type: str, node_id: str) -> dict[str, Any]:
-        existing = self.get_node(node_type, node_id)
-        if not existing:
+        existing = self._get_node_raw(node_type, node_id)
+        if not existing or existing.get("deleted_at") is not None:
             raise KeyError(f"{node_type} {node_id} not found")
         existing["deleted_at"] = self._now()
         existing["updated_at"] = self._now()
@@ -202,7 +215,6 @@ class JsonGraphRepository:
         return validated
 
     def delete_edge(self, edge_type: str, src_id: str, dst_id: str) -> bool:
-        rel = self.registry.get_relationship(edge_type)
         key = f"{src_id}::{dst_id}"
         bucket = self._edges.setdefault(edge_type, {})
         if key not in bucket:
