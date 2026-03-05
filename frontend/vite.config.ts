@@ -14,5 +14,7 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
+    outDir: "../src/lance_graph_project/static",
+    emptyOutDir: true,
   },
 });

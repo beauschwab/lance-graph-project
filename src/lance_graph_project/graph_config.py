@@ -6,7 +6,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from lance_graph import GraphConfig
 
-SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schema.yaml"
+_PKG_DIR = Path(__file__).resolve().parent
+
+# Look for schema.yaml inside the package first (wheel installs),
+# then fall back to the repository root (editable / source installs).
+if (_PKG_DIR / "schema.yaml").exists():
+    SCHEMA_PATH = _PKG_DIR / "schema.yaml"
+else:
+    SCHEMA_PATH = _PKG_DIR.parents[1] / "schema.yaml"
 
 
 def load_schema(schema_path: Path = SCHEMA_PATH) -> dict:

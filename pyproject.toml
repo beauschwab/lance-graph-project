@@ -46,5 +46,14 @@ lance-graph-project = "lance_graph_project:main"
 orchestrate = "lance_graph_project.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.8.14,<0.9.0"]
-build-backend = "uv_build"
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+# Include build artifacts even though they are in .gitignore
+artifacts = [
+    "src/lance_graph_project/static/**",
+    "src/lance_graph_project/schema.yaml",
+]
+
+[tool.hatch.build.hooks.custom]
