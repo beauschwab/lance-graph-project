@@ -1,7 +1,7 @@
 [project]
 name = "lance-graph-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Local-first project orchestration system with graph-based work item management"
 readme = "README.md"
 authors = [
     { name = "Beau Schwab", email = "schwab.beau@gmail.com" }
@@ -10,6 +10,8 @@ requires-python = ">=3.12"
 dependencies = [
     "click>=8.3.0",
     "fastapi>=0.117.1",
+    "fastmcp>=3.1.0",
+    "networkx>=3.5",
     "pydantic>=2.11.9",
     "pyyaml>=6.0.3",
     "uvicorn>=0.37.0",
@@ -25,20 +27,16 @@ dev = [
 ]
 
 [project.optional-dependencies]
-backend = [
-    "click>=8.3.0",
-    "fastapi>=0.117.1",
-    "fastmcp>=3.1.0",
+embeddings = [
     "lance>=1.2.1",
     "lance-graph>=0.3.1",
     "lancedb>=0.25.0",
-    "networkx>=3.5",
     "onnxruntime>=1.23.0",
     "pyarrow>=21.0.0",
-    "pydantic>=2.11.9",
-    "pyyaml>=6.0.3",
     "sentence-transformers>=5.1.1",
-    "uvicorn>=0.37.0",
+]
+all = [
+    "lance-graph-project[embeddings]",
 ]
 
 [project.scripts]
@@ -46,5 +44,25 @@ lance-graph-project = "lance_graph_project:main"
 orchestrate = "lance_graph_project.cli:main"
 
 [build-system]
-requires = ["uv_build>=0.8.14,<0.9.0"]
-build-backend = "uv_build"
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["src/lance_graph_project"]
+artifacts = [
+    "src/lance_graph_project/static/**",
+    "src/lance_graph_project/schema.yaml",
+]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/lance_graph_project/",
+    "frontend/",
+    "schema.yaml",
+    "hatch_build.py",
+    "pyproject.toml",
+    "README.md",
+]
