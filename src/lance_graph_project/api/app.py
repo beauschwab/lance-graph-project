@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from lance_graph_project.api.routers.analysis import router as analysis_router
@@ -30,8 +30,6 @@ def _spa_not_found_handler(static_dir: Path):
 
     async def handler(request: Request, _exc: Exception) -> FileResponse:
         if request.url.path.startswith("/api"):
-            from fastapi.responses import JSONResponse
-
             return JSONResponse({"detail": "Not Found"}, status_code=404)
         return FileResponse(index)
 

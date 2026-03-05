@@ -24,7 +24,7 @@ class CustomBuildHook(BuildHookInterface):
         # --- Bundle schema.yaml inside the package ---
         schema_src = root / "schema.yaml"
         schema_dst = pkg_dir / "schema.yaml"
-        if schema_src.exists() and not schema_dst.exists():
+        if schema_src.exists():
             shutil.copy2(str(schema_src), str(schema_dst))
             print(f"Copied schema.yaml into {schema_dst.relative_to(root)}")
 
