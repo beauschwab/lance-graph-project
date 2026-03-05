@@ -36,7 +36,12 @@ embeddings = [
     "sentence-transformers>=5.1.1",
 ]
 all = [
-    "lance-graph-project[embeddings]",
+    "lance>=1.2.1",
+    "lance-graph>=0.3.1",
+    "lancedb>=0.25.0",
+    "onnxruntime>=1.23.0",
+    "pyarrow>=21.0.0",
+    "sentence-transformers>=5.1.1",
 ]
 
 [project.scripts]

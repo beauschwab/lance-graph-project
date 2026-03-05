@@ -48,7 +48,7 @@ class FrontendBuildHook(BuildHookInterface):
 
         self.app.display_info("Installing frontend dependencies …")
         subprocess.run(
-            [npm, "ci", "--ignore-scripts"],
+            [npm, "ci", "--ignore-scripts"],  # ignore-scripts: security best practice for builds
             cwd=str(frontend_dir),
             check=True,
             env={**os.environ, "CI": "true"},
