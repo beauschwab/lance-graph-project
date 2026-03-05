@@ -1,0 +1,191 @@
+version: 1
+nodes:
+  Program:
+    primary_key: program_id
+    fields:
+      program_id: str
+      name: str
+      description: str
+      status: str
+      start_date: str?
+      target_date: str?
+      embedding: vector[384]?
+  Workstream:
+    primary_key: workstream_id
+    fields:
+      workstream_id: str
+      name: str
+      description: str
+      status: str
+      program_id: str
+      owner_team_id: str?
+      embedding: vector[384]?
+  Feature:
+    primary_key: feature_id
+    fields:
+      feature_id: str
+      title: str
+      description: str
+      status: str
+      priority: int
+      workstream_id: str
+      tags: list[str]
+      embedding: vector[384]?
+  Epic:
+    primary_key: epic_id
+    fields:
+      epic_id: str
+      title: str
+      description: str
+      status: str
+      priority: int
+      feature_id: str
+      estimate_days: float?
+      start_date: str?
+      target_date: str?
+      tags: list[str]
+      embedding: vector[384]?
+  Issue:
+    primary_key: issue_id
+    fields:
+      issue_id: str
+      title: str
+      description: str
+      status: str
+      priority: int
+      epic_id: str
+      estimate_days: float?
+      start_date: str?
+      target_date: str?
+      actual_date: str?
+      risk_level: str?
+      tags: list[str]
+      sort_order: int
+      embedding: vector[384]?
+  Milestone:
+    primary_key: milestone_id
+    fields:
+      milestone_id: str
+      name: str
+      description: str
+      target_date: str?
+      status: str
+      embedding: vector[384]?
+  Team:
+    primary_key: team_id
+    fields:
+      team_id: str
+      name: str
+      capacity_points: int?
+      lead_name: str?
+      color: str?
+  Person:
+    primary_key: person_id
+    fields:
+      person_id: str
+      name: str
+      email: str?
+      team_id: str?
+      role: str?
+      avatar_url: str?
+  Application:
+    primary_key: app_id
+    fields:
+      app_id: str
+      name: str
+      description: str
+      owner_team_id: str?
+      tech_stack: list[str]
+  Artifact:
+    primary_key: artifact_id
+    fields:
+      artifact_id: str
+      title: str
+      content_summary: str
+      url: str?
+      artifact_type: str?
+      embedding: vector[384]?
+  Tag:
+    primary_key: tag_id
+    fields:
+      tag_id: str
+      name: str
+      color: str?
+      category: str?
+  StatusConfig:
+    primary_key: status_id
+    fields:
+      status_id: str
+      name: str
+      color: str?
+      category: str
+      sort_order: int
+  PriorityConfig:
+    primary_key: priority_id
+    fields:
+      priority_id: str
+      name: str
+      color: str?
+      level: int
+      icon: str?
+
+relationships:
+  CONTAINS:
+    src: src_id
+    dst: dst_id
+    fields:
+      src_id: str
+      dst_id: str
+      container_type: str
+      created_at: str?
+  DEPENDS_ON:
+    src: src_id
+    dst: dst_id
+    fields:
+      src_id: str
+      dst_id: str
+      dependency_type: str
+      lag_days: int
+      reason: str?
+      created_at: str?
+      resolved_at: str?
+  ASSIGNED_TO:
+    src: src_id
+    dst: dst_id
+    fields:
+      src_id: str
+      dst_id: str
+      role: str
+      assigned_at: str?
+  HANDOFF_TO:
+    src: src_id
+    dst: dst_id
+    fields:
+      src_id: str
+      dst_id: str
+      handoff_type: str
+      sla_days: int
+      due_date: str?
+      status: str?
+      created_at: str?
+  DELIVERS:
+    src: milestone_id
+    dst: workitem_id
+    fields:
+      milestone_id: str
+      workitem_id: str
+      commitment_level: str
+  RELATES_TO:
+    src: artifact_id
+    dst: workitem_id
+    fields:
+      artifact_id: str
+      workitem_id: str
+      relation_type: str
+  TAGGED_WITH:
+    src: workitem_id
+    dst: tag_id
+    fields:
+      workitem_id: str
+      tag_id: str
+      tagged_at: str?

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "orchestration-graph": {
+      "command": "python",
+      "args": ["-m", "lance_graph_project.mcp_server"],
+      "env": {
+        "PROJECT_ROOT": "C:/path/to/project"
+      }
+    }
+  }
+}

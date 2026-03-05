@@ -1,0 +1,50 @@
+[project]
+name = "lance-graph-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Beau Schwab", email = "schwab.beau@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "click>=8.3.0",
+    "fastapi>=0.117.1",
+    "pydantic>=2.11.9",
+    "pyyaml>=6.0.3",
+    "uvicorn>=0.37.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=1.18.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "ruff>=0.13.2",
+]
+
+[project.optional-dependencies]
+backend = [
+    "click>=8.3.0",
+    "fastapi>=0.117.1",
+    "fastmcp>=3.1.0",
+    "lance>=1.2.1",
+    "lance-graph>=0.3.1",
+    "lancedb>=0.25.0",
+    "networkx>=3.5",
+    "onnxruntime>=1.23.0",
+    "pyarrow>=21.0.0",
+    "pydantic>=2.11.9",
+    "pyyaml>=6.0.3",
+    "sentence-transformers>=5.1.1",
+    "uvicorn>=0.37.0",
+]
+
+[project.scripts]
+lance-graph-project = "lance_graph_project:main"
+orchestrate = "lance_graph_project.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.8.14,<0.9.0"]
+build-backend = "uv_build"
