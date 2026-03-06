@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { Calendar, ChevronRight, Circle } from "lucide-react";
 
 import { createEdge, listEdges } from "../../api/edges";
 import { listNodes, updateNode } from "../../api/nodes";
+import { StatusBadge } from "../shared/StatusBadge";
+import { colors, spacing, radii, typography, shadows } from "../../theme";
 
 type Task = {
   issue_id: string;
@@ -19,7 +22,7 @@ type Dependency = {
 
 function formatDate(value?: string | null): string {
   if (!value) {
-    return "";
+    return "—";
   }
   return value.slice(0, 10);
 }
@@ -29,6 +32,8 @@ function shiftDate(iso: string | null | undefined, deltaDays: number): string {
   base.setDate(base.getDate() + deltaDays);
   return base.toISOString().slice(0, 10);
 }
+
+const ROW_HEIGHT = 48;
 
 type GanttViewProps = {
   selectedIssueId?: string | null;
@@ -92,27 +97,79 @@ export function GanttView({ selectedIssueId = null, onSelectIssue }: GanttViewPr
   }
 
   return (
-    <section>
-      <h2>Gantt View</h2>
-      <p>Drag from output dot to input dot to create dependencies.</p>
+    <section className="animate-fadeIn">
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: spacing.sm,
+          marginBottom: spacing.lg,
+          fontSize: typography.sm,
+          color: colors.textTertiary,
+        }}
+      >
+        <Circle size={8} fill={colors.primary} color={colors.primary} />
+        <span>Drag output dot to input dot to link dependencies</span>
+      </div>
 
-      <div style={{ position: "relative", border: "1px solid #e5e5e5", borderRadius: 10, overflow: "hidden" }}>
-        <svg width="100%" height={Math.max(120, tasks.length * 52)} style={{ position: "absolute", top: 0, left: 0 }}>
+      <div
+        style={{
+          position: "relative",
+          border: `1px solid ${colors.border}`,
+          borderRadius: radii.lg,
+          overflow: "hidden",
+          background: colors.surfacePrimary,
+          boxShadow: shadows.sm,
+        }}
+      >
+        {/* Header row */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "240px 36px 110px 110px 80px 36px",
+            alignItems: "center",
+            gap: spacing.md,
+            padding: `${spacing.md}px ${spacing.lg}px`,
+            background: colors.surfaceSecondary,
+            borderBottom: `1px solid ${colors.border}`,
+            fontSize: typography.xs,
+            fontWeight: typography.medium,
+            color: colors.textTertiary,
+            textTransform: "uppercase" as const,
+            letterSpacing: typography.wider,
+          }}
+        >
+          <span>Task</span>
+          <span style={{ textAlign: "center" }}>Out</span>
+          <span>Start</span>
+          <span>Target</span>
+          <span>Shift</span>
+          <span style={{ textAlign: "center" }}>In</span>
+        </div>
+
+        {/* Dependency lines SVG overlay */}
+        <svg
+          width="100%"
+          height={Math.max(120, tasks.length * ROW_HEIGHT)}
+          style={{ position: "absolute", top: 36, left: 0, pointerEvents: "none" }}
+        >
           {dependencies.map((edge, idx) => {
             const src = rowIndex[edge.src_id];
             const dst = rowIndex[edge.dst_id];
             if (src === undefined || dst === undefined) {
               return null;
             }
-            const y1 = src * 52 + 24;
-            const y2 = dst * 52 + 24;
+            const y1 = src * ROW_HEIGHT + ROW_HEIGHT / 2;
+            const y2 = dst * ROW_HEIGHT + ROW_HEIGHT / 2;
             return (
               <path
                 key={`${edge.src_id}-${edge.dst_id}-${idx}`}
-                d={`M 260 ${y1} C 310 ${y1}, 310 ${y2}, 360 ${y2}`}
-                stroke="#6b7280"
+                d={`M 276 ${y1} C 330 ${y1}, 330 ${y2}, 384 ${y2}`}
+                stroke={colors.primary}
                 strokeWidth="1.5"
                 fill="none"
+                opacity="0.5"
+                strokeDasharray="4 2"
               />
             );
           })}
@@ -125,48 +182,110 @@ export function GanttView({ selectedIssueId = null, onSelectIssue }: GanttViewPr
               onClick={() => onSelectIssue?.(task.issue_id)}
               style={{
                 display: "grid",
-                gridTemplateColumns: "220px 40px 120px 120px 120px 40px",
+                gridTemplateColumns: "240px 36px 110px 110px 80px 36px",
                 alignItems: "center",
-                gap: 8,
-                padding: 8,
-                borderBottom: "1px solid #efefef",
-                background: task.issue_id === selectedIssueId ? "#eef4ff" : "rgba(255,255,255,0.94)",
+                gap: spacing.md,
+                padding: `0 ${spacing.lg}px`,
+                height: ROW_HEIGHT,
+                borderBottom: `1px solid ${colors.borderLight}`,
+                background: task.issue_id === selectedIssueId ? colors.surfaceSelected : colors.surfacePrimary,
+                cursor: "pointer",
+                transition: "background 100ms ease",
               }}
             >
-              <div>
-                <strong>{task.title}</strong>
-                <div style={{ fontSize: 12, color: "#666" }}>{task.status}</div>
+              <div style={{ overflow: "hidden" }}>
+                <div
+                  style={{
+                    fontSize: typography.base,
+                    fontWeight: typography.medium,
+                    color: colors.textPrimary,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {task.title}
+                </div>
+                <div style={{ marginTop: 1 }}>
+                  <StatusBadge value={task.status} />
+                </div>
               </div>
 
-              <div
-                title="Drag from this dot"
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.setData("text/plain", task.issue_id);
-                  setLinkSource(task.issue_id);
+              {/* Output dot */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <div
+                  title="Drag from this dot"
+                  draggable
+                  onDragStart={(event) => {
+                    event.dataTransfer.setData("text/plain", task.issue_id);
+                    setLinkSource(task.issue_id);
+                  }}
+                  onDragEnd={() => setLinkSource(null)}
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: radii.pill,
+                    background: colors.primary,
+                    cursor: "grab",
+                    border: `2px solid ${colors.surfacePrimary}`,
+                    boxShadow: shadows.sm,
+                    transition: "transform 150ms ease",
+                  }}
+                />
+              </div>
+
+              <span style={{ fontSize: typography.sm, color: colors.textSecondary, fontFamily: typography.monoFamily }}>
+                {formatDate(task.start_date)}
+              </span>
+              <span style={{ fontSize: typography.sm, color: colors.textSecondary, fontFamily: typography.monoFamily }}>
+                {formatDate(task.target_date)}
+              </span>
+
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  void shiftTask(task, 1);
                 }}
-                onDragEnd={() => setLinkSource(null)}
-                style={{ width: 14, height: 14, borderRadius: 99, background: "#0ea5e9", justifySelf: "center", cursor: "grab" }}
-              />
-
-              <span>{formatDate(task.start_date)}</span>
-              <span>{formatDate(task.target_date)}</span>
-
-              <button type="button" onClick={() => void shiftTask(task, 1)}>
-                +1 day
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: spacing.xxs,
+                  padding: `${spacing.xxs}px ${spacing.md}px`,
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: radii.sm,
+                  background: colors.surfacePrimary,
+                  color: colors.textSecondary,
+                  fontSize: typography.xs,
+                  fontWeight: typography.medium,
+                  cursor: "pointer",
+                }}
+              >
+                <ChevronRight size={12} />
+                +1d
               </button>
 
-              <div
-                title={linkSource ? `Drop to link ${linkSource} -> ${task.issue_id}` : "Drop dependency here"}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  const sourceId = event.dataTransfer.getData("text/plain") || linkSource;
-                  void onDropDependency(task.issue_id, sourceId || null);
-                  setLinkSource(null);
-                }}
-                style={{ width: 14, height: 14, borderRadius: 99, background: "#22c55e", justifySelf: "center" }}
-              />
+              {/* Input dot */}
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <div
+                  title={linkSource ? `Drop to link ${linkSource} → ${task.issue_id}` : "Drop dependency here"}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    const sourceId = event.dataTransfer.getData("text/plain") || linkSource;
+                    void onDropDependency(task.issue_id, sourceId || null);
+                    setLinkSource(null);
+                  }}
+                  style={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: radii.pill,
+                    background: colors.statusDone,
+                    border: `2px solid ${colors.surfacePrimary}`,
+                    boxShadow: shadows.sm,
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>
