@@ -22,7 +22,7 @@ type Dependency = {
 
 function formatDate(value?: string | null): string {
   if (!value) {
-    return "—";
+    return "Not set";
   }
   return value.slice(0, 10);
 }

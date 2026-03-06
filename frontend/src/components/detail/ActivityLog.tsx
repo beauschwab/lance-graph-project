@@ -11,12 +11,11 @@ function readString(item: Record<string, unknown>, key: string): string | null {
 }
 
 function formatTimestamp(value: string): string {
-	try {
-		const d = new Date(value);
-		return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
-	} catch {
+	const d = new Date(value);
+	if (isNaN(d.getTime())) {
 		return value;
 	}
+	return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 export function ActivityLog({ item }: ActivityLogProps) {
