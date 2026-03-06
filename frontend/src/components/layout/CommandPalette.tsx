@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { colors, spacing, radii, typography, shadows } from "../../theme";
 
 export type CommandItem = {
 	id: string;
@@ -34,27 +36,69 @@ export function CommandPalette({ open, commands, onClose }: CommandPaletteProps)
 			style={{
 				position: "fixed",
 				inset: 0,
-				background: "rgba(0,0,0,0.35)",
+				background: colors.overlay,
+				backdropFilter: "blur(4px)",
 				display: "grid",
 				placeItems: "start center",
-				paddingTop: "10vh",
+				paddingTop: "12vh",
 				zIndex: 100,
 			}}
+			className="animate-fadeIn"
 		>
 			<div
 				role="dialog"
 				aria-modal="true"
 				onClick={(event) => event.stopPropagation()}
-				style={{ width: "min(640px, 90vw)", background: "#fff", borderRadius: 10, border: "1px solid #e5e7eb" }}
+				className="animate-scaleIn"
+				style={{
+					width: "min(560px, 90vw)",
+					background: colors.surfacePrimary,
+					borderRadius: radii.xxl,
+					border: `1px solid ${colors.border}`,
+					boxShadow: shadows.xl,
+					overflow: "hidden",
+				}}
 			>
-				<input
-					autoFocus
-					value={query}
-					onChange={(event) => setQuery(event.target.value)}
-					placeholder="Type a command"
-					style={{ width: "100%", padding: 12, border: 0, borderBottom: "1px solid #e5e7eb", fontSize: 14 }}
-				/>
-				<div style={{ maxHeight: 280, overflowY: "auto", padding: 8, display: "grid", gap: 4 }}>
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						gap: spacing.md,
+						padding: `0 ${spacing.xl}px`,
+						borderBottom: `1px solid ${colors.borderLight}`,
+					}}
+				>
+					<Search size={16} color={colors.textTertiary} />
+					<input
+						autoFocus
+						value={query}
+						onChange={(event) => setQuery(event.target.value)}
+						placeholder="Type a command..."
+						style={{
+							flex: 1,
+							padding: `${spacing.xl}px 0`,
+							border: "none",
+							fontSize: typography.md,
+							color: colors.textPrimary,
+							background: "transparent",
+							outline: "none",
+						}}
+					/>
+					<kbd
+						style={{
+							padding: `2px ${spacing.sm}px`,
+							borderRadius: radii.xs,
+							border: `1px solid ${colors.borderLight}`,
+							fontSize: typography.xs,
+							fontFamily: typography.monoFamily,
+							color: colors.textTertiary,
+							background: colors.surfaceSecondary,
+						}}
+					>
+						Esc
+					</kbd>
+				</div>
+				<div style={{ maxHeight: 320, overflowY: "auto", padding: spacing.sm }}>
 					{filtered.map((command) => (
 						<button
 							key={command.id}
@@ -64,12 +108,34 @@ export function CommandPalette({ open, commands, onClose }: CommandPaletteProps)
 								setQuery("");
 								onClose();
 							}}
-							style={{ textAlign: "left", border: "1px solid #e5e7eb", borderRadius: 6, padding: "8px 10px", background: "#fff" }}
+							style={{
+								display: "block",
+								width: "100%",
+								textAlign: "left",
+								border: "none",
+								borderRadius: radii.md,
+								padding: `${spacing.md}px ${spacing.lg}px`,
+								background: "transparent",
+								color: colors.textPrimary,
+								fontSize: typography.base,
+								cursor: "pointer",
+								transition: "background 100ms ease",
+							}}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.background = colors.surfaceHover;
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.background = "transparent";
+							}}
 						>
 							{command.label}
 						</button>
 					))}
-					{filtered.length === 0 ? <div style={{ color: "#6b7280", padding: 8 }}>No commands found.</div> : null}
+					{filtered.length === 0 ? (
+						<div style={{ color: colors.textTertiary, padding: `${spacing.xl}px ${spacing.lg}px`, textAlign: "center", fontSize: typography.sm }}>
+							No commands found.
+						</div>
+					) : null}
 				</div>
 			</div>
 		</div>

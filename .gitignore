@@ -12,3 +12,6 @@ wheels/
 # Data directories (test artifacts)
 .orchestrate_data/
 exports/
+
+# Node
+frontend/node_modules/

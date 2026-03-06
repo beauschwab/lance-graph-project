@@ -11,6 +11,8 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from "@dnd-kit/utilities";
 
 import { listNodes, reorderNodes, updateNode } from "../../api/nodes";
+import { PriorityPill } from "../shared/PriorityPill";
+import { colors, spacing, radii, typography, shadows, getStatusStyle } from "../../theme";
 
 type IssueItem = {
   issue_id: string;
@@ -36,23 +38,52 @@ function KanbanCard({
     data: { status: issue.status },
   });
 
+  const statusStyle = getStatusStyle(issue.status);
+
   return (
     <article
       ref={setNodeRef}
       style={{
         transform: CSS.Transform.toString(transform),
-        transition,
-        border: selected ? "1px solid #3b82f6" : "1px solid #ddd",
-        borderRadius: 8,
-        padding: 8,
-        background: selected ? "#eef4ff" : "#fff",
+        transition: transition ?? undefined,
+        border: selected ? `1.5px solid ${colors.primary}` : `1px solid ${colors.borderLight}`,
+        borderRadius: radii.lg,
+        padding: spacing.lg,
+        background: selected ? colors.surfaceSelected : colors.surfacePrimary,
+        cursor: "pointer",
+        boxShadow: selected ? shadows.md : shadows.xs,
       }}
       onClick={() => onSelect(issue.issue_id)}
       {...attributes}
       {...listeners}
     >
-      <strong>{issue.title}</strong>
-      <div>Priority {issue.priority}</div>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: spacing.sm }}>
+        <strong
+          style={{
+            fontSize: typography.base,
+            fontWeight: typography.medium,
+            color: colors.textPrimary,
+            lineHeight: typography.tight,
+          }}
+        >
+          {issue.title}
+        </strong>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: spacing.md, marginTop: spacing.md }}>
+        <PriorityPill value={String(issue.priority)} />
+        <span
+          style={{
+            marginLeft: "auto",
+            fontSize: "9px",
+            fontWeight: typography.medium,
+            color: statusStyle.color,
+            textTransform: "uppercase",
+            letterSpacing: typography.widest,
+          }}
+        >
+          {statusStyle.label}
+        </span>
+      </div>
     </article>
   );
 }
@@ -69,22 +100,67 @@ function KanbanColumn({
   onSelectIssue?: (issueId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `col-${status}`, data: { status } });
+  const statusStyle = getStatusStyle(status);
 
   return (
     <section
       ref={setNodeRef}
       style={{
         flex: 1,
-        minWidth: 250,
-        border: "1px solid #e0e0e0",
-        borderRadius: 10,
-        padding: 10,
-        background: isOver ? "#f5faff" : "#fafafa",
+        minWidth: 260,
+        borderRadius: radii.xl,
+        padding: spacing.lg,
+        background: isOver ? colors.surfaceHover : colors.surfaceSecondary,
+        border: isOver ? `1.5px dashed ${colors.primary}` : `1px solid ${colors.borderLight}`,
+        transition: "all 200ms ease",
       }}
     >
-      <h3>{status}</h3>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: spacing.lg,
+          padding: `0 ${spacing.xs}px`,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: spacing.sm }}>
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: "50%",
+              background: statusStyle.color,
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontSize: typography.sm,
+              fontWeight: typography.semibold,
+              color: colors.textPrimary,
+              textTransform: "capitalize",
+            }}
+          >
+            {statusStyle.label}
+          </span>
+        </div>
+        <span
+          style={{
+            fontSize: typography.xs,
+            fontWeight: typography.medium,
+            color: colors.textTertiary,
+            background: colors.surfacePrimary,
+            padding: `1px ${spacing.sm}px`,
+            borderRadius: radii.pill,
+            border: `1px solid ${colors.borderLight}`,
+          }}
+        >
+          {issues.length}
+        </span>
+      </div>
       <SortableContext items={issues.map((issue) => issue.issue_id)} strategy={verticalListSortingStrategy}>
-        <div style={{ display: "grid", gap: 8 }}>
+        <div style={{ display: "grid", gap: spacing.md }}>
           {issues.map((issue) => (
             <KanbanCard
               key={issue.issue_id}
@@ -182,10 +258,9 @@ export function KanbanView({ selectedIssueId = null, onSelectIssue }: KanbanView
   }
 
   return (
-    <section>
-      <h2>Kanban View</h2>
+    <section className="animate-fadeIn">
       <DndContext sensors={sensors} onDragEnd={(event) => void onDragEnd(event)}>
-        <div style={{ display: "flex", gap: 12, alignItems: "flex-start", overflowX: "auto" }}>
+        <div style={{ display: "flex", gap: spacing.lg, alignItems: "flex-start", overflowX: "auto", paddingBottom: spacing.md }}>
           {STATUSES.map((status) => (
             <KanbanColumn
               key={status}

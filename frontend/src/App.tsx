@@ -17,6 +17,7 @@ import { Sidebar } from "./components/layout/Sidebar";
 import { TopBar } from "./components/layout/TopBar";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useUiStore } from "./stores/ui";
+import { colors, layout, spacing } from "./theme";
 
 export default function App() {
   const navigate = useNavigate();
@@ -45,11 +46,19 @@ export default function App() {
   const resolvedView = location.pathname === "/kanban" ? "kanban" : location.pathname === "/gantt" ? "gantt" : "table";
 
   return (
-    <div style={{ fontFamily: "'Segoe UI', sans-serif", display: "grid", gridTemplateColumns: "220px 1fr 340px", minHeight: "100vh" }}>
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: `${layout.sidebarWidth}px 1fr ${layout.detailPanelWidth}px`,
+        height: "100vh",
+        overflow: "hidden",
+        background: colors.pageBg,
+      }}
+    >
       <Sidebar />
-      <main style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+      <main style={{ display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
         <TopBar
-          title="Orchestration UI"
+          title="Orchestrate"
           view={showViewSwitcher ? resolvedView : view}
           onViewChange={(next) => {
             setView(next);
@@ -63,7 +72,7 @@ export default function App() {
           }}
           onOpenCommandPalette={() => setPaletteOpen(true)}
         />
-        <div style={{ padding: 16 }}>
+        <div style={{ flex: 1, overflow: "auto", padding: spacing.xl }}>
           <Routes>
             <Route path="/" element={<TableView selectedIssueId={selectedIssueId} onSelectIssue={setSelectedIssueId} />} />
             <Route
